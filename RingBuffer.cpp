@@ -8,6 +8,13 @@ private:
 	char* firstEl;
 	char* lastEl;
 
+	char pop_drop() {
+		char ch = *lastEl;
+		*lastEl = '=';
+		--realSize;
+		return ch;
+	}
+
 public:
 	RingBuffer(int32_t size) {
 		buffer = new char[size];
@@ -23,10 +30,12 @@ public:
 
 	void push(const char& ch) {
 		++firstEl;
-		if (firstEl == buffer + allocSize) {
+		if (firstEl == buffer + allocSize)
 			firstEl = buffer;
-		}
-		if (firstEl == lastEl){
+
+		if (realSize == 0) ++lastEl;
+
+		if (firstEl == lastEl && realSize > 1) {
 			++lastEl;
 			if (lastEl == buffer + allocSize)
 				lastEl = buffer;
@@ -36,9 +45,19 @@ public:
 			++realSize;
 	}
 
-	/*char pop() {
-
-	}*/
+	char pop() {
+		if (realSize == 0) return '=';
+		if (realSize == 1) {
+			char ch = pop_drop();
+			return ch;
+		}
+		
+		char ch = pop_drop();
+		++lastEl;
+		if (lastEl == buffer + allocSize)
+			lastEl = buffer;
+		return ch;
+	}
 
 	void print_buffer() const {
 		for (int i = 0; i < allocSize; ++i) {
@@ -50,7 +69,6 @@ public:
 			std::cout << '\n';
 		}
 	}
-
 };
 
 
@@ -65,12 +83,15 @@ int main() {
 	rb.push('a');
 	rb.push('b');
 	rb.push('c');
-	rb.push('d');
-	rb.push('d');
-	rb.push('d');
-	rb.push('d');
 
 	rb.print_buffer();
+	std::cout << '\n';
+
+	rb.pop();
+	rb.pop();
+	rb.pop();
+	rb.pop();
+	rb.pop();
 
 	return 0;
 }
